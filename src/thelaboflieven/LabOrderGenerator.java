@@ -16,15 +16,25 @@ public class LabOrderGenerator {
     public static List<Labanalysiscode> codes = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
+        if (args.length != 1)
+        {
+            System.err.println("Invalid number of arguments: " + args.length);
+            System.err.println("Usage: <LabOrderGenerator> nrOrders ");
+            System.exit(1);
+        }
+        String nrOfOrdersString = args[0];
+        long numberOfOrders = Long.parseLong(nrOfOrdersString);
         LabOrderGenerator gen = new LabOrderGenerator();
-        gen.storeGeneratedOrders();
+        gen.storeGeneratedOrders(numberOfOrders);
     }
 
-    public void storeGeneratedOrders() throws IOException {
+    public void storeGeneratedOrders(long numberOrders) throws IOException {
+        boolean printheaders = false;
         generateCodes();
         FileWriter writer = new FileWriter(new File("labordercodes.csv"));
         String sep = ",";
-        writer.write("pk" + sep + "analysecode" + sep + "analysiscodeversion" + sep + "representation" + sep + "referenceValue" + sep + "unit" + "\n");
+        if (printheaders)
+            writer.write("pk" + sep + "analysecode" + sep + "analysiscodeversion" + sep + "representation" + sep + "referenceValue" + sep + "unit" + "\n");
         for (Labanalysiscode code : codes)
         {
             writer.write(code.toCsv(sep) + "\n");
@@ -34,11 +44,13 @@ public class LabOrderGenerator {
         FileWriter labspecimenWriter = new FileWriter(new File("labspecimen.csv"));
         FileWriter labresultWriter = new FileWriter(new File("labresult.csv"));
 
-        laborderwriter.write("insertts" + sep  + "ordernr" + sep + "patientnr" + sep + "visitNr" + "\n");
-        labspecimenWriter.write("specimennr" + sep + "ordernr" + "\n");
-        labresultWriter.write("result" + sep + "deleted" + sep +  "code.pk" + sep + "inserttimestamp" + sep + "specimennr" + sep + "executiontimestamp"+ "\n");
+        if (printheaders){
+            laborderwriter.write("insertts" + sep  + "ordernr" + sep + "patientnr" + sep + "visitNr" + "\n");
+            labspecimenWriter.write("specimennr" + sep + "ordernr" + "\n");
+            labresultWriter.write("result" + sep + "deleted" + sep +  "code.pk" + sep + "inserttimestamp" + sep + "specimennr" + sep + "executiontimestamp"+ "\n");
+        }
 
-        for (int i = 0; i < 1000000; i++)
+        for (int i = 0; i < numberOrders; i++)
         {
             LabOrder order = generateOrder();
             laborderwriter.write(order.toCsv(sep) + "\n");
